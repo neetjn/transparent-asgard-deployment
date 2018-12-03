@@ -15,7 +15,7 @@ and begin terraforming your environment by using:
 docker run tl-asgl-deployment
 ```
 
-The target machine can be specified in `ansible/group_vars/all.yml`, otherwise the ansible script will point to localhost.
+The target machine can be specified in `ansible/group_vars/all.yml`, otherwise the ansible script will point to localhost. Credentials must be provided for ansible to communicate with foreign machines. These credentials can also be specified in the yml file listed above.
 
 ---
 

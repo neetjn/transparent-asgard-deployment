@@ -1,1 +1,3 @@
 target_host: localhost
+target_host_username: foo
+target_host_password: bar
