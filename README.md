@@ -3,7 +3,7 @@
 
 The goal of this project is to simplify staging environments for deploying asgard lite microservices. As I don't have the spending power to afford aws instances explicitly for development/testing, this project will help terraform my virtual private servers for handling deployments.
 
-For use without docker, simply execute `setup.sh` on a RH or Debian based machine. This will install ansible if not already available, as well as other necessary tools for successful deployments on your machine. Otherwise, simply build the docker image using:
+For use without docker, simply execute `setup.sh` on a RH or Debian based machine. This will install ansible if not already available, as well as other necessary tools to terraform your target machine. Otherwise, simply build the docker image using:
 
 ```sh
 docker build . -t tl-asgl-deployment
