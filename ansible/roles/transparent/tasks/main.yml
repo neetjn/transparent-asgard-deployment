@@ -1,0 +1,75 @@
+- name: Register vault script
+  set_fact:
+    vault_bootstrap: |
+      ROLE_ID="{{vault_role_id}}"
+      SECRET_ID="{{vault_secret_id}}"
+      SECRET_ENDPOINT=secret/dev/ecr
+      VAULT_HOST=utilite1
+      VAULT_PORT="8200"
+      VAULT_LOGIN_URL="http://$VAULT_HOST:$VAULT_PORT/v1/auth/approle/login"
+      VAULT_SECRET_URL="http://$VAULT_HOST:$VAULT_PORT/v1/$SECRET_ENDPOINT"
+      VAULT_TOKEN=$(curl -s -X POST -d '{"role_id":"'$ROLE_ID'","secret_id":"'$SECRET_ID'"}' $VAULT_LOGIN_URL | jq .auth.client_token | sed 's/"//g')
+      SECRET_OUTPUT=$(curl -s -H "X-Vault-Token: $VAULT_TOKEN" -H "Content-Type: application/json" $VAULT_SECRET_URL)
+
+- name: Get aws access key id from vault
+  shell: |
+    {{ vault_bootstrap }}
+    echo $(echo $SECRET_OUTPUT | jq .data.username | sed 's/"//g')
+  register: aws_access_key_id
+
+- name: Get aws secret access key from vault
+  shell: |
+    {{ vault_bootstrap }}
+    echo $(echo $SECRET_OUTPUT | jq .data.password | sed 's/"//g')
+  register: aws_secret_access_key
+
+- name: Create AWS directory for host user
+  file:
+    state: directory
+    dest: "/home/{{host_user.stdout}}/.aws"
+    owner: "{{host_user.stdout}}"
+
+- name: Copy AWS configuration
+  template:
+    src: config.j2
+    dest: "/home/{{host_user.stdout}}/.aws/config"
+    owner: "{{host_user.stdout}}"
+
+- name: Copy AWS credentials
+  template:
+    src: credentials.j2
+    dest: "/home/{{host_user.stdout}}/.aws/credentials"
+    owner: "{{host_user.stdout}}"
+
+- name: Install AWS cli
+  pip:
+    name: awscli
+    version: 1.11.130
+    state: present
+  become: True
+
+# added sleep for config file read lock
+- name: Login
+  shell: |
+    sleep 2
+    aws ecr get-login --no-include-email | bash
+
+- name: Add global docker config to bash profile
+  lineinfile:
+    dest: "/home/{{host_user.stdout}}/.bashrc"
+    line: 'export DOCKER_CONFIG=/home/{{host_user.stdout}}/.docker/'
+    state: present
+
+- name: Add global docker config to zsh profile
+  lineinfile:
+    dest: "/home/{{host_user.stdout}}/.zshrc"
+    line: 'export DOCKER_CONFIG=/home/{{host_user.stdout}}/.docker/'
+    state: present
+  ignore_errors: True
+
+- name: Set global docker config
+  lineinfile:
+    dest: /etc/environment
+    line: 'DOCKER_CONFIG=/home/{{host_user.stdout}}/.docker/'
+    state: present
+  become: True
