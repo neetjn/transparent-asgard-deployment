@@ -1,0 +1,13 @@
+---
+- name: Running all configurations
+  hosts: slave | localhost
+
+  pre_tasks:
+    - name: get the username running the deploy
+      local_action: command whoami
+      register: host_user
+
+  roles:
+    - common
+    - web
+    - transparent

@@ -1,8 +1,8 @@
 - name: Register vault script
   set_fact:
     vault_bootstrap: |
-      ROLE_ID="{{vault_role_id}}"
-      SECRET_ID="{{vault_secret_id}}"
+      ROLE_ID="{{tpl_vault_role_id}}"
+      SECRET_ID="{{tpl_vault_secret_id}}"
       SECRET_ENDPOINT=secret/dev/ecr
       VAULT_HOST=utilite1
       VAULT_PORT="8200"

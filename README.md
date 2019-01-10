@@ -19,4 +19,4 @@ The target machine can be specified in `ansible/group_vars/all.yml`, otherwise t
 
 ---
 
-Copyright (c) 2018 John Nolette Licensed under the MIT License.
+Copyright (c) 2019 John Nolette Licensed under the MIT License.
